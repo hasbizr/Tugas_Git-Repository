@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Tabrak Box Hijau</title>
+</head>
+<body style="text-align:center;font-family:Arial">
+
+<h1>Tabrak Box Hijau</h1>
+<h3>1 Level terdiri dari 5 Score</h3>
+<h3>Naik Level Box Makin Cepat & Waktu Bertambah</h3> 
+<h4>
+Score: <span id="score">0</span> |
+Level: <span id="level">1</span> |
+Time: <span id="time">10</span>
+</h4>
+
+<button id="restart" style="display:none">Restart</button>
+<br><br>
+<canvas id="game" width="500" height="300"
+style="border:2px solid black;background:#eee"></canvas>
+
+<script>
+let c = document.getElementById("game"),
+ctx = c.getContext("2d"),
+scoreT = document.getElementById("score"),
+levelT = document.getElementById("level"),
+timeT = document.getElementById("time"),
+btn = document.getElementById("restart");
+
+let px, py, tx, ty, size = 40;
+let score, level, time, speed;
+let keys = {}, gameOver = false;
+
+addEventListener("keydown", e=>keys[e.key.toLowerCase()]=true);
+addEventListener("keyup", e=>keys[e.key.toLowerCase()]=false);
+
+function rand(){
+  tx = Math.random()*(c.width-size);
+  ty = Math.random()*(c.height-size);
+}
+
+function start(){
+  px=50; py=100;
+  score=0; level=1; time=10; speed=4;
+  gameOver=false;
+  scoreT.textContent=score;
+  levelT.textContent=level;
+  timeT.textContent=time;
+  btn.style.display="none";
+  rand();
+}
+
+function update(){
+  if(gameOver) return;
+
+  if(keys["a"]) px-=speed;
+  if(keys["d"]) px+=speed;
+  if(keys["w"]) py-=speed;
+  if(keys["s"]) py+=speed;
+
+  px=Math.max(0,Math.min(px,c.width-size));
+  py=Math.max(0,Math.min(py,c.height-size));
+
+  if(px<tx+size&&px+size>tx&&py<ty+size&&py+size>ty){
+    score++;
+    scoreT.textContent=score;
+    rand();
+
+    if(score>=5){
+      level++;
+      speed+=1.5;
+      score=0;
+      time+=5;
+      levelT.textContent=level;
+      scoreT.textContent=score;
+    }
+  }
+}
+
+function draw(){
+  ctx.clearRect(0,0,c.width,c.height);
+  update();
+
+  ctx.fillStyle="red";
+  ctx.fillRect(px,py,size,size);
+
+  ctx.fillStyle="green";
+  ctx.fillRect(tx,ty,size,size);
+
+  if(!gameOver) requestAnimationFrame(draw);
+  else{
+    ctx.font="28px Arial";
+    ctx.fillStyle="black";
+    ctx.fillText("GAME OVER",150,150);
+  }
+}
+
+function timer(){
+  let t=setInterval(()=>{
+    if(gameOver){clearInterval(t);return;}
+    time--;
+    timeT.textContent=time;
+    if(time<=0){
+      gameOver=true;
+      btn.style.display="inline";
+      clearInterval(t);
+    }
+  },1000);
+}
+
+btn.onclick=()=>{start();timer();draw();};
+
+start();
+timer();
+draw();
+</script>
+</body>
+</html>
